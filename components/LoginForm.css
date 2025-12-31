@@ -1,0 +1,237 @@
+.login-form-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  background: transparent;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-bottom: 0.4em;
+  background-color: #171717;
+  border-radius: 25px;
+  transition: 0.4s ease-in-out;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.login-form:hover {
+  transform: scale(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#heading {
+  text-align: center;
+  margin: 2em;
+  color: rgb(255, 255, 255);
+  font-size: 1.75em;
+  font-weight: 700;
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  border-radius: 25px;
+  padding: 0.6em;
+  border: none;
+  outline: none;
+  color: white;
+  background-color: #171717;
+  box-shadow: inset 2px 5px 10px rgb(5, 5, 5);
+}
+
+.input-icon {
+  height: 1.3em;
+  width: 1.3em;
+  fill: white;
+  flex-shrink: 0;
+}
+
+.input-field {
+  background: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #d3d3d3;
+  font-size: 1em;
+}
+
+.input-field::placeholder {
+  color: #666;
+}
+
+.login-form .btn {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  margin-top: 2.5em;
+  gap: 0.5em;
+}
+
+.button1 {
+  padding: 0.5em;
+  padding-left: 1.1em;
+  padding-right: 1.1em;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: #252525;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.button1:hover {
+  background-color: black;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.button2 {
+  padding: 0.5em;
+  padding-left: 2.3em;
+  padding-right: 2.3em;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: #252525;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.button2:hover {
+  background-color: black;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.button3 {
+  margin-bottom: 3em;
+  padding: 0.5em;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: #252525;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.button3:hover {
+  background-color: #dc2626;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+.button-google {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding: 0.7em;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  outline: none;
+  transition: 0.4s ease-in-out;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.button-google:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.button-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5em 0;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider::before {
+  margin-right: 0.5em;
+}
+
+.divider::after {
+  margin-left: 0.5em;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .login-form-wrapper {
+    background: transparent;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-form {
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+  }
+
+  #heading {
+    font-size: 1.2em;
+    margin: 1.5em;
+  }
+
+  .login-form .btn {
+    flex-direction: column;
+  }
+
+  .button1,
+  .button2 {
+    width: 100%;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+}
+
