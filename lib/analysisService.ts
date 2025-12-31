@@ -17,7 +17,7 @@ export interface AnalysisHistory {
   fileType: string;
   fileSize: number;
   analysisData: any;
-  createdAt: Timestamp | Date;
+  createdAt: Date | Timestamp;
 }
 
 const ANALYSES_COLLECTION = 'analyses';
@@ -54,25 +54,24 @@ export async function getUserAnalyses(userId: string): Promise<AnalysisHistory[]
     );
     
     const querySnapshot = await getDocs(q);
-    const analyses = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-    })) as AnalysisHistory[];
+    const analyses = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        userId: data.userId,
+        fileName: data.fileName,
+        fileType: data.fileType,
+        fileSize: data.fileSize,
+        analysisData: data.analysisData,
+        createdAt: data.createdAt?.toDate() || new Date(),
+      } as AnalysisHistory;
+    });
     
     // Sort by createdAt in descending order (newest first) in JavaScript
     analyses.sort((a, b) => {
-      const getDate = (date: Date | Timestamp): Date => {
-        if (date instanceof Date) {
-          return date;
-        }
-        if (date && typeof (date as Timestamp).toDate === 'function') {
-          return (date as Timestamp).toDate();
-        }
-        return new Date();
-      };
-      const dateA = getDate(a.createdAt);
-      const dateB = getDate(b.createdAt);
+      // createdAt is already converted to Date in the map above, but TypeScript needs help
+      const dateA = a.createdAt instanceof Date ? a.createdAt : (a.createdAt as any).toDate ? (a.createdAt as any).toDate() : new Date();
+      const dateB = b.createdAt instanceof Date ? b.createdAt : (b.createdAt as any).toDate ? (b.createdAt as any).toDate() : new Date();
       return dateB.getTime() - dateA.getTime();
     });
     
