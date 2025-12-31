@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -20,16 +20,42 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { TrendingUp, Database, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { TrendingUp, Database, BarChart3, PieChart as PieChartIcon, Save, Download, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { exportData, ExportFormat } from "@/lib/exportService";
 
 interface DataVisualizationProps {
   data: any;
+  onSave?: () => void;
+  showSaveButton?: boolean;
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
-export default function DataVisualization({ data }: DataVisualizationProps) {
+export default function DataVisualization({ data, onSave, showSaveButton = true }: DataVisualizationProps) {
   const { charts, statistics, rawData, insights } = data || {};
+  const [isExporting, setIsExporting] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showRawData, setShowRawData] = useState(false);
+
+  const handleExport = async (format: ExportFormat) => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      await exportData({
+        fileName: data?.fileInfo?.name || 'analysis',
+        statistics,
+        rawData,
+        insights,
+        charts,
+      }, format);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const chartComponents = useMemo(() => {
     if (!charts || charts.length === 0) return null;
@@ -245,47 +271,133 @@ export default function DataVisualization({ data }: DataVisualizationProps) {
               <Database className="w-6 h-6 text-white" />
               Raw Data from Your File
             </h3>
-            <span className="text-xs text-white/60 bg-[#252525] px-2 py-1 rounded border border-white/10">
-              ✓ Real data from your upload
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-white/60 bg-[#252525] px-2 py-1 rounded border border-white/10">
+                ✓ Real data from your upload
+              </span>
+              <button
+                onClick={() => setShowRawData(!showRawData)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#252525] text-white rounded-lg hover:bg-black transition-colors"
+              >
+                {showRawData ? (
+                  <>
+                    <EyeOff className="w-4 h-4" />
+                    Hide
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    View
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/10">
-              <thead className="bg-[#252525]">
-                <tr>
-                  {Object.keys(rawData[0]).map((key) => (
-                    <th
-                      key={key}
-                      className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider"
-                    >
-                      {key}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-[#171717] divide-y divide-white/10">
-                {rawData.slice(0, 100).map((row: any, index: number) => (
-                  <tr key={index} className="hover:bg-[#252525] transition-colors">
-                    {Object.values(row).map((value: any, i: number) => (
-                      <td
-                        key={i}
-                        className="px-6 py-4 whitespace-nowrap text-sm text-white/90"
+          {showRawData && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-white/10">
+                <thead className="bg-[#252525]">
+                  <tr>
+                    {Object.keys(rawData[0]).map((key) => (
+                      <th
+                        key={key}
+                        className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase tracking-wider"
                       >
-                        {value}
-                      </td>
+                        {key}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            {rawData.length > 100 && (
-              <p className="mt-4 text-sm text-white/60 text-center">
-                Showing first 100 rows of {rawData.length} total rows
-              </p>
+                </thead>
+                <tbody className="bg-[#171717] divide-y divide-white/10">
+                  {rawData.slice(0, 100).map((row: any, index: number) => (
+                    <tr key={index} className="hover:bg-[#252525] transition-colors">
+                      {Object.values(row).map((value: any, i: number) => (
+                        <td
+                          key={i}
+                          className="px-6 py-4 whitespace-nowrap text-sm text-white/90"
+                        >
+                          {value}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {rawData.length > 100 && (
+                <p className="mt-4 text-sm text-white/60 text-center">
+                  Showing first 100 rows of {rawData.length} total rows
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Save and Export Buttons */}
+      <div className="bg-[#171717] rounded-xl shadow-lg p-6 border border-white/10">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {showSaveButton && onSave && (
+            <button
+              onClick={onSave}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-5 h-5" />
+              Save to Profile
+            </button>
+          )}
+          
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-5 h-5" />
+              Export
+              <ChevronDown className={`w-4 h-4 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showExportMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowExportMenu(false)}
+                />
+                <div className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 bg-[#252525] border border-white/20 rounded-lg shadow-xl z-20 min-w-[180px]">
+                  <button
+                    onClick={() => handleExport('pdf')}
+                    className="w-full text-left px-4 py-3 text-white hover:bg-[#2a2a2a] transition-colors flex items-center gap-2 rounded-t-lg"
+                  >
+                    <span>📄</span>
+                    Export as PDF
+                  </button>
+                  <button
+                    onClick={() => handleExport('excel')}
+                    className="w-full text-left px-4 py-3 text-white hover:bg-[#2a2a2a] transition-colors flex items-center gap-2 border-t border-white/10"
+                  >
+                    <span>📊</span>
+                    Export as Excel
+                  </button>
+                  <button
+                    onClick={() => handleExport('csv')}
+                    className="w-full text-left px-4 py-3 text-white hover:bg-[#2a2a2a] transition-colors flex items-center gap-2 border-t border-white/10"
+                  >
+                    <span>📋</span>
+                    Export as CSV
+                  </button>
+                  <button
+                    onClick={() => handleExport('json')}
+                    className="w-full text-left px-4 py-3 text-white hover:bg-[#2a2a2a] transition-colors flex items-center gap-2 border-t border-white/10 rounded-b-lg"
+                  >
+                    <span>📦</span>
+                    Export as JSON
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

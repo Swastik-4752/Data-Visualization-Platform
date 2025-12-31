@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import FileUpload from "@/components/FileUpload";
 import DataVisualization from "@/components/DataVisualization";
 import CursorParticles from "@/components/CursorParticles";
 import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { saveAnalysis } from "@/lib/analysisService";
 import { Upload, BarChart3, FileText, LogIn, LogOut, User } from "lucide-react";
 
 export default function Home() {
@@ -16,8 +18,40 @@ export default function Home() {
   const { currentUser, signOut } = useAuth();
   const router = useRouter();
 
-  const handleAnalysisComplete = (data: any) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+
+  const handleAnalysisComplete = async (data: any) => {
     setAnalysisData(data);
+    // Don't auto-save anymore - let user decide with Save button
+  };
+
+  const handleSave = async () => {
+    if (!currentUser || !analysisData?.fileInfo) {
+      alert('Please log in to save analyses');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage('');
+    
+    try {
+      await saveAnalysis(
+        currentUser.uid,
+        analysisData.fileInfo.name || 'Unknown',
+        analysisData.fileInfo.type || 'unknown',
+        analysisData.fileInfo.size || 0,
+        analysisData
+      );
+      setSaveMessage('Analysis saved successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      console.error('Error saving analysis:', error);
+      setSaveMessage('Failed to save analysis. Please try again.');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -38,12 +72,15 @@ export default function Home() {
         <div className="flex justify-end items-center gap-3 mb-4">
           {currentUser ? (
             <>
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#252525] text-white rounded-lg">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-4 py-2 bg-[#252525] text-white rounded-lg hover:bg-black transition-all cursor-pointer"
+              >
                 <User className="w-5 h-5" />
                 <span className="hidden sm:inline">
                   {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
                 </span>
-              </div>
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-2 px-4 py-2 bg-[#dc2626] text-white rounded-lg hover:bg-[#b91c1c] transition-all shadow-lg hover:shadow-xl"
@@ -102,7 +139,20 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-              <DataVisualization data={analysisData} />
+              <DataVisualization 
+                data={analysisData} 
+                onSave={handleSave}
+                showSaveButton={!!currentUser}
+              />
+              {saveMessage && (
+                <div className={`mt-4 text-center px-4 py-3 rounded-lg ${
+                  saveMessage.includes('success') 
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/50' 
+                    : 'bg-red-500/20 text-red-400 border border-red-500/50'
+                }`}>
+                  {saveMessage}
+                </div>
+              )}
             </div>
           )}
         </div>
