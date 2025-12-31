@@ -62,8 +62,17 @@ export async function getUserAnalyses(userId: string): Promise<AnalysisHistory[]
     
     // Sort by createdAt in descending order (newest first) in JavaScript
     analyses.sort((a, b) => {
-      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
-      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+      const getDate = (date: Date | Timestamp): Date => {
+        if (date instanceof Date) {
+          return date;
+        }
+        if (date && typeof (date as Timestamp).toDate === 'function') {
+          return (date as Timestamp).toDate();
+        }
+        return new Date();
+      };
+      const dateA = getDate(a.createdAt);
+      const dateB = getDate(b.createdAt);
       return dateB.getTime() - dateA.getTime();
     });
     
