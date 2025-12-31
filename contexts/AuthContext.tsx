@@ -38,12 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function signUp(email: string, password: string, displayName?: string) {
+  async function signUp(email: string, password: string, displayName?: string): Promise<void> {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (displayName && userCredential.user) {
       await updateProfile(userCredential.user, { displayName });
     }
-    return userCredential.user;
   }
 
   async function signIn(email: string, password: string) {
